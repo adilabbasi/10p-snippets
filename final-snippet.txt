@@ -1,0 +1,187 @@
+Creating a project:
+-------------------
+
+	django-admin startproject mysite
+
+	python manage.py startapp polls
+
+	python manage.py runserver
+
+	Note: Changing the port ( $ python manage.py runserver 8080 )
+
+===================================================================
+
+	Plug Application
+	----------------
+
+	mysite/settings.py
+	INSTALLED_APPS = [
+	    
+
+	    'polls.apps.PollsConfig',
+
+
+	    'django.contrib.admin',
+	    'django.contrib.auth',
+	    'django.contrib.contenttypes',
+	    'django.contrib.sessions',
+	    'django.contrib.messages',
+	    'django.contrib.staticfiles',
+	]
+
+===================================================================
+
+	polls/views.py
+	--------------
+
+	from django.http import HttpResponse
+
+
+	def index(request):
+	    return HttpResponse("Hello, world. You're at the polls index.")
+
+
+
+
+===================================================================
+urls
+===================================================================
+
+CREATE polls/urls.py:
+---------------------
+
+	from django.urls import path
+
+	from . import views
+
+	urlpatterns = [
+	    path('', views.index, name='index'),
+	]
+
+
+	mysite/urls.py
+	--------------
+
+	from django.contrib import admin
+	from django.urls import include, path
+
+	urlpatterns = [
+	    path('polls/', include('polls.urls')),
+	    path('admin/', admin.site.urls),
+	]
+
+
+
+hit via browsers ....
+
+===============================================================
+Creating models
+---------------
+
+	File : polls/models.py
+	=======================
+
+	from django.db import models
+
+
+	class Question(models.Model):
+	    question_text = models.CharField(max_length=200)
+	    pub_date = models.DateTimeField('datexyz published')
+
+
+create unmanaged model of don't want it to create db table.
+
+https://docs.djangoproject.com/en/2.1/ref/models/fields/#django.db.models.CharField
+===============================================================
+
+
+Application Migrations
+----------------------
+
+$ python manage.py makemigrations polls
+
+$ python manage.py migrate 
+
+
+===============================================================
+
+polls/templates/polls/index.html
+================================
+
+{% block title %}Testing Demo{% endblock %}
+{% block content %}
+    {% if latest_question_list %}
+        <ul>
+        {% for question in latest_question_list %}
+            <li>{{ question.question_text }}</li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>No polls are available.</p>
+    {% endif %}
+{% endblock %}
+
+
+==============================================================
+
+views.py
+==============================================================
+
+from django.http import HttpResponse
+from django.template import loader
+from .models import Question
+
+
+def index(request):
+    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    template = loader.get_template('polls/index.html')
+    context = {
+        'latest_question_list': latest_question_list,
+    }
+    return HttpResponse(template.render(context, request))
+
+
+
+==============================================================
+
+Introducing the Django Admin
+----------------------------
+
+	$ python manage.py createsuperuser
+	$ python manage.py runserver
+
+
+	polls/admin.py
+	==============
+
+	from django.contrib import admin
+
+	from .models import Question
+
+	admin.site.register(Question)
+
+
+==============================================================
+
+
+Admin Lte
+===============
+pip install django-adminlte2
+INSTALLED_APPS = [
+    'django_adminlte',
+    'django_adminlte_theme',
+    'django.contrib.admin',
+]
+
+- Change sequence to remove template from admin app 
+
+
+polls/templates/polls/index.html
+================================
+
+{% extends 'adminlte/base.html' %}
+
+
+
+
+
